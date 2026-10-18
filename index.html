@@ -1049,13 +1049,15 @@
 
         /* ---------- mobile nav ---------- */
         var nav = $("#topnav"), toggle = $("#navToggle");
-        toggle.addEventListener("click", function(){
-          var open = nav.classList.toggle("open");
-          toggle.setAttribute("aria-expanded", open ? "true" : "false");
-        });
-        $$("#mobileMenu a").forEach(function(a){
-          a.addEventListener("click", function(){ nav.classList.remove("open"); });
-        });
+        if(nav && toggle){
+          toggle.addEventListener("click", function(){
+            var open = nav.classList.toggle("open");
+            toggle.setAttribute("aria-expanded", open ? "true" : "false");
+          });
+          $$("#mobileMenu a").forEach(function(a){
+            a.addEventListener("click", function(){ nav.classList.remove("open"); });
+          });
+        }
 
         /* ---------- modals ---------- */
         function openModal(name){
@@ -1110,14 +1112,18 @@
         });
 
         /* ---------- contact form ---------- */
-        $("#contactForm").addEventListener("submit", function(e){
-          e.preventDefault();
-          toast("Preview only — the live MRFolio contact form would deliver this to hello@mrfolio.com.");
-          e.target.reset();
-        });
+        var contactFormEl = $("#contactForm");
+        if(contactFormEl){
+          contactFormEl.addEventListener("submit", function(e){
+            e.preventDefault();
+            toast("Preview only — the live MRFolio contact form would deliver this to hello@mrfolio.com.");
+            e.target.reset();
+          });
+        }
 
         /* ---------- fiverr import demo ---------- */
         var importBtn = $("#importBtn"), importStatus = $("#importStatus"), imported = false;
+        if(importBtn){
         importBtn.addEventListener("click", function(){
           if(imported) return;
           imported = true;
@@ -1134,6 +1140,7 @@
             toast("Fiverr import complete — 128 reviews added to the portfolio (preview).");
           }, 500 + cards.length * 450 + 200);
         });
+        }
 
         /* ---------- dashboard: side menu + mobile bottom bar ---------- */
         function selectDashPane(target){
@@ -1146,6 +1153,10 @@
         });
         $$(".bbar-item").forEach(function(item){
           item.addEventListener("click", function(){ selectDashPane(item.getAttribute("data-menu")); });
+        });
+        /* ---------- demo logout ---------- */
+        $$("[data-logout]").forEach(function(b){
+          b.addEventListener("click", function(){ window.location.href = "index.html"; });
         });
 
         /* ---------- dashboard: theme picker ---------- */
@@ -1160,6 +1171,7 @@
 
         /* ---------- dashboard: github connect ---------- */
         var ghBtn = $("#ghBtn"), ghStatus = $("#ghStatus"), ghOn = false;
+        if(ghBtn && ghStatus){
         ghBtn.addEventListener("click", function(){
           ghOn = !ghOn;
           ghBtn.classList.toggle("connected", ghOn);
@@ -1169,9 +1181,11 @@
             : "Connect GitHub to publish your site to your own account.";
           toast(ghOn ? "GitHub connected (preview) — publishing now targets your account." : "GitHub disconnected (preview).");
         });
+        }
 
         /* ---------- dashboard: publish ---------- */
         var pubBtn = $("#publishBtn"), publishing = false;
+        if(pubBtn){
         pubBtn.addEventListener("click", function(){
           if(publishing) return;
           publishing = true;
@@ -1188,6 +1202,7 @@
             }, 2600);
           }, 900);
         });
+        }
 
         /* ---------- pricing toggle ---------- */
         var proPrice = $("#proPrice"), proPer = $("#proPer"), proNote = $("#proNote");
@@ -1219,7 +1234,7 @@
         }
 
         /* ---------- footer year ---------- */
-        $("#year").textContent = new Date().getFullYear();
+        var yearEl = $("#year"); if(yearEl){ yearEl.textContent = new Date().getFullYear(); }
       })();
     </script>
 

@@ -494,6 +494,8 @@
       .dash-topnav .demo-badge{font-size:11px;font-weight:800;background:rgba(237,166,60,.14);color:var(--accent);border:1px solid rgba(237,166,60,.35);padding:4px 10px;border-radius:999px}
       .dash-topnav .back{margin-left:auto;font-size:13px;color:#b9b7ac;text-decoration:none;font-weight:700}
       .dash-topnav .back:hover{color:#f0eee6}
+      .dash-topnav .logout-btn{margin-left:auto;background:none;border:1px solid #2a2d37;color:#b9b7ac;font-weight:700;font-size:13px;padding:7px 18px;border-radius:10px;cursor:pointer}
+      .dash-topnav .logout-btn:hover{border-color:var(--accent);color:var(--accent)}
       .dash-page-wrap{max-width:1180px;margin:0 auto;padding:26px 20px 60px}
       @media (max-width:760px){
         .dash-page-wrap{padding:14px 12px 120px}
@@ -523,7 +525,7 @@
     <header class="dash-topnav">
       <a class="brand" href="index.html">MR<b>Folio</b></a>
       <span class="demo-badge">Demo preview</span>
-      <a class="back" href="index.html">&larr; Back to home</a>
+      <button class="logout-btn" data-logout>Logout</button>
     </header>
     <main class="dash-page-wrap">
 <div class="dash reveal">
@@ -625,6 +627,7 @@
                   <button class="btn btn-dark btn-sm gh-btn" id="ghBtn">Connect GitHub</button>
                 </div>
                 <button class="btn btn-primary publish-btn" id="publishBtn"><svg class="icon" style="width:16px;height:16px"><use href="#i-rocket"/></svg> Publish site</button>
+                <button class="menu-item" data-logout style="margin-top:10px;color:#8f8d84"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Logout</button>
               </aside>
             </div>
           </div>
@@ -655,13 +658,15 @@
 
         /* ---------- mobile nav ---------- */
         var nav = $("#topnav"), toggle = $("#navToggle");
-        toggle.addEventListener("click", function(){
-          var open = nav.classList.toggle("open");
-          toggle.setAttribute("aria-expanded", open ? "true" : "false");
-        });
-        $$("#mobileMenu a").forEach(function(a){
-          a.addEventListener("click", function(){ nav.classList.remove("open"); });
-        });
+        if(nav && toggle){
+          toggle.addEventListener("click", function(){
+            var open = nav.classList.toggle("open");
+            toggle.setAttribute("aria-expanded", open ? "true" : "false");
+          });
+          $$("#mobileMenu a").forEach(function(a){
+            a.addEventListener("click", function(){ nav.classList.remove("open"); });
+          });
+        }
 
         /* ---------- modals ---------- */
         function openModal(name){
@@ -716,14 +721,18 @@
         });
 
         /* ---------- contact form ---------- */
-        $("#contactForm").addEventListener("submit", function(e){
-          e.preventDefault();
-          toast("Preview only — the live MRFolio contact form would deliver this to hello@mrfolio.com.");
-          e.target.reset();
-        });
+        var contactFormEl = $("#contactForm");
+        if(contactFormEl){
+          contactFormEl.addEventListener("submit", function(e){
+            e.preventDefault();
+            toast("Preview only — the live MRFolio contact form would deliver this to hello@mrfolio.com.");
+            e.target.reset();
+          });
+        }
 
         /* ---------- fiverr import demo ---------- */
         var importBtn = $("#importBtn"), importStatus = $("#importStatus"), imported = false;
+        if(importBtn){
         importBtn.addEventListener("click", function(){
           if(imported) return;
           imported = true;
@@ -740,6 +749,7 @@
             toast("Fiverr import complete — 128 reviews added to the portfolio (preview).");
           }, 500 + cards.length * 450 + 200);
         });
+        }
 
         /* ---------- dashboard: side menu + mobile bottom bar ---------- */
         function selectDashPane(target){
@@ -752,6 +762,10 @@
         });
         $$(".bbar-item").forEach(function(item){
           item.addEventListener("click", function(){ selectDashPane(item.getAttribute("data-menu")); });
+        });
+        /* ---------- demo logout ---------- */
+        $$("[data-logout]").forEach(function(b){
+          b.addEventListener("click", function(){ window.location.href = "index.html"; });
         });
 
         /* ---------- dashboard: theme picker ---------- */
@@ -766,6 +780,7 @@
 
         /* ---------- dashboard: github connect ---------- */
         var ghBtn = $("#ghBtn"), ghStatus = $("#ghStatus"), ghOn = false;
+        if(ghBtn && ghStatus){
         ghBtn.addEventListener("click", function(){
           ghOn = !ghOn;
           ghBtn.classList.toggle("connected", ghOn);
@@ -775,9 +790,11 @@
             : "Connect GitHub to publish your site to your own account.";
           toast(ghOn ? "GitHub connected (preview) — publishing now targets your account." : "GitHub disconnected (preview).");
         });
+        }
 
         /* ---------- dashboard: publish ---------- */
         var pubBtn = $("#publishBtn"), publishing = false;
+        if(pubBtn){
         pubBtn.addEventListener("click", function(){
           if(publishing) return;
           publishing = true;
@@ -794,6 +811,7 @@
             }, 2600);
           }, 900);
         });
+        }
 
         /* ---------- pricing toggle ---------- */
         var proPrice = $("#proPrice"), proPer = $("#proPer"), proNote = $("#proNote");
@@ -825,7 +843,7 @@
         }
 
         /* ---------- footer year ---------- */
-        $("#year").textContent = new Date().getFullYear();
+        var yearEl = $("#year"); if(yearEl){ yearEl.textContent = new Date().getFullYear(); }
       })();
     </script>
   </body>
