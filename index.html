@@ -346,6 +346,26 @@
       .publish-btn{width:100%;justify-content:center;margin-top:12px}
       .publish-btn.done{background:var(--green);color:#06281a}
 
+      /* mobile bottom icon bar (dashboard only — landing untouched) */
+      .dash-bottombar{display:none}
+      @media (max-width:760px){
+        .dash-side .who,.dash-side .menu-item,.dash-side .side-spacer{display:none}
+        .dash-side{padding:16px}
+        .dash-bottombar{
+          display:flex;position:sticky;bottom:0;z-index:40;
+          background:rgba(15,16,23,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+          border:1px solid #262933;border-top:0;border-radius:0 0 18px 18px;
+          margin:-19px 0 0;padding:10px 6px calc(10px + env(safe-area-inset-bottom));
+        }
+        .bbar-item{
+          flex:1;min-width:0;background:none;border:0;color:#8f8d84;font-weight:700;font-size:10.5px;
+          display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 2px;border-radius:12px;
+        }
+        .bbar-item .icon{width:23px;height:23px}
+        .bbar-item.sel{color:var(--accent)}
+        .bbar-item:active{background:#1b1d27}
+      }
+
       /* ---------- pricing ---------- */
       .billing-toggle{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px;gap:4px}
       .billing-toggle button{border:0;background:none;color:var(--muted);font-weight:800;font-size:14px;padding:8px 18px;border-radius:999px}
@@ -864,6 +884,13 @@
               </aside>
             </div>
           </div>
+          <nav class="dash-bottombar" aria-label="Dashboard sections">
+            <button class="bbar-item sel" data-menu="profile"><svg class="icon"><use href="#i-user"/></svg><span>Profile</span></button>
+            <button class="bbar-item" data-menu="services"><svg class="icon"><use href="#i-brief"/></svg><span>Services</span></button>
+            <button class="bbar-item" data-menu="work"><svg class="icon"><use href="#i-grid"/></svg><span>Work</span></button>
+            <button class="bbar-item" data-menu="reviews"><svg class="icon"><use href="#i-star"/></svg><span>Reviews</span></button>
+            <button class="bbar-item" data-menu="themes"><svg class="icon"><use href="#i-palette"/></svg><span>Themes</span></button>
+          </nav>
           <p style="text-align:center;color:var(--faint);font-size:13.5px;margin-top:18px" class="reveal">Interactive mockup — menu, GitHub connect and Publish all respond, but nothing leaves this page.</p>
         </div>
       </section>
@@ -1022,6 +1049,7 @@
           <div class="field"><label for="li-pass">Password</label><input class="input" id="li-pass" type="password" placeholder="Your password" required /></div>
           <button class="btn btn-primary" type="submit">Login to dashboard</button>
         </form>
+          <button class="btn btn-ghost" type="button" data-demo-login style="width:100%;margin-top:10px">Try the demo — no signup needed</button>
         <p class="alt-line">New to MRFolio? <button data-switch-modal="register">Create a free account</button></p>
         <span class="demo-flag">Preview — login is illustrative, no account is accessed.</span>
       </div>
@@ -1044,6 +1072,7 @@
           </div>
           <button class="btn btn-primary" type="submit">Register &amp; start building</button>
         </form>
+          <button class="btn btn-ghost" type="button" data-demo-login style="width:100%;margin-top:10px">Just looking? Explore the demo dashboard</button>
         <p class="alt-line">Already registered? <button data-switch-modal="login">Login</button></p>
         <span class="demo-flag">Preview — registration is illustrative, no account is created.</span>
       </div>
@@ -1098,15 +1127,33 @@
           m.addEventListener("click", function(e){ if(e.target === m) closeModals(); });
         });
         document.addEventListener("keydown", function(e){ if(e.key === "Escape") closeModals(); });
+        function demoLogin(){
+          closeModals();
+          $$('[data-open-modal="login"]').forEach(function(el){
+            el.removeAttribute("data-open-modal");
+            el.setAttribute("data-goto-dashboard", "1");
+            if(el.textContent.trim() === "Login") el.textContent = "Dashboard";
+          });
+          var d = $("#dashboard");
+          if(d){ d.scrollIntoView({behavior:"smooth", block:"start"}); }
+          toast("Demo mode — explore your future dashboard below.");
+        }
         $$("[data-auth-form]").forEach(function(f){
           f.addEventListener("submit", function(e){
             e.preventDefault();
-            var kind = f.getAttribute("data-auth-form");
-            closeModals();
-            toast(kind === "register"
-              ? "Preview only — in the real MRFolio this creates your account and opens the dashboard."
-              : "Preview only — in the real MRFolio this takes you straight to your dashboard.");
+            demoLogin();
           });
+        });
+        $$("[data-demo-login]").forEach(function(b){
+          b.addEventListener("click", demoLogin);
+        });
+        document.addEventListener("click", function(e){
+          var t = (e.target && e.target.closest) ? e.target.closest("[data-goto-dashboard]") : null;
+          if(t){
+            e.preventDefault();
+            var db = $("#dashboard");
+            if(db){ db.scrollIntoView({behavior:"smooth", block:"start"}); }
+          }
         });
 
         /* ---------- generic demo buttons ---------- */
@@ -1150,14 +1197,17 @@
           }, 500 + cards.length * 450 + 200);
         });
 
-        /* ---------- dashboard: right-side menu ---------- */
+        /* ---------- dashboard: side menu + mobile bottom bar ---------- */
+        function selectDashPane(target){
+          $$(".menu-item").forEach(function(i){ i.classList.toggle("sel", i.getAttribute("data-menu") === target); });
+          $$(".bbar-item").forEach(function(i){ i.classList.toggle("sel", i.getAttribute("data-menu") === target); });
+          $$(".pane").forEach(function(p){ p.classList.toggle("active", p.getAttribute("data-pane") === target); });
+        }
         $$(".menu-item").forEach(function(item){
-          item.addEventListener("click", function(){
-            $$(".menu-item").forEach(function(i){ i.classList.remove("sel"); });
-            item.classList.add("sel");
-            var target = item.getAttribute("data-menu");
-            $$(".pane").forEach(function(p){ p.classList.toggle("active", p.getAttribute("data-pane") === target); });
-          });
+          item.addEventListener("click", function(){ selectDashPane(item.getAttribute("data-menu")); });
+        });
+        $$(".bbar-item").forEach(function(item){
+          item.addEventListener("click", function(){ selectDashPane(item.getAttribute("data-menu")); });
         });
 
         /* ---------- dashboard: theme picker ---------- */
