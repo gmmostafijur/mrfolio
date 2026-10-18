@@ -496,6 +496,7 @@
       .dash-topnav .back:hover{color:#f0eee6}
       .dash-topnav .logout-btn{margin-left:auto;background:none;border:1px solid #2a2d37;color:#b9b7ac;font-weight:700;font-size:13px;padding:7px 18px;border-radius:10px;cursor:pointer}
       .dash-topnav .logout-btn:hover{border-color:var(--accent);color:var(--accent)}
+      .dash.no-link .dash-linkbar{display:none}
       .dash-page-wrap{max-width:1180px;margin:0 auto;padding:26px 20px 60px}
       @media (max-width:760px){
         .dash-page-wrap{padding:14px 12px 120px}
@@ -528,12 +529,12 @@
       <button class="logout-btn" data-logout>Logout</button>
     </header>
     <main class="dash-page-wrap">
-<div class="dash reveal">
+<div class="dash reveal no-link">
             <div class="dash-linkbar">
               <span class="live"><i></i> LIVE</span>
               <span class="link">
                 <svg class="icon" style="width:15px;height:15px;color:var(--green)"><use href="#i-check"/></svg>
-                <span class="mono">https://<b>danielreyes.github.io</b></span>
+                <span class="mono">https://<b id="liveUrl">danielreyes.github.io</b></span>
               </span>
               <span class="icon-btn" style="cursor:default"><svg class="icon" style="width:15px;height:15px"><use href="#i-check"/></svg> Link ready to share</span>
               <button class="icon-btn" data-demo="visit"><svg class="icon" style="width:15px;height:15px"><use href="#i-ext"/></svg> Visit site</button>
@@ -640,6 +641,24 @@
           </nav>
       <p style="text-align:center;color:var(--faint);font-size:13.5px;margin-top:18px">Interactive mockup — menu, GitHub connect and Publish all respond, but nothing leaves this page.</p>
     </main>
+    <div class="modal-back" id="modal-gh" role="dialog" aria-modal="true" aria-labelledby="ghGuideTitle">
+      <div class="modal" style="max-width:620px">
+        <button class="x" data-close-modal aria-label="Close">&times;</button>
+        <div id="ghStep1">
+          <h3 id="ghGuideTitle">Connect GitHub — step by step</h3>
+          <p class="sub">Watch this quick Bangla guide first (about 1.5 min).</p>
+          <video controls preload="metadata" src="github-guide-bn.mp4" style="width:100%;border-radius:12px;background:#000;margin-top:6px"></video>
+          <button class="btn btn-primary" id="ghNextBtn" style="width:100%;margin-top:14px;justify-content:center">Next: Connect my GitHub</button>
+        </div>
+        <div id="ghStep2" style="display:none">
+          <h3>Connect your GitHub account</h3>
+          <p class="sub">Enter your GitHub username to link your account (demo).</p>
+          <div class="field"><label for="gh-username">GitHub username</label><input class="input" id="gh-username" type="text" placeholder="e.g. danielreyes" value="danielreyes" /></div>
+          <button class="btn btn-dark gh-btn" id="ghConnectBtn" style="width:100%;justify-content:center">Connect with GitHub</button>
+          <p class="alt-line"><button id="ghBackBtn" style="background:none;border:0;color:var(--accent);font-weight:700;cursor:pointer">&larr; Back to video</button></p>
+        </div>
+      </div>
+    </div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
       (function(){
@@ -779,17 +798,42 @@
         });
 
         /* ---------- dashboard: github connect ---------- */
-        var ghBtn = $("#ghBtn"), ghStatus = $("#ghStatus"), ghOn = false;
+        var ghBtn = $("#ghBtn"), ghStatus = $("#ghStatus"), ghOn = false, ghUser = "";
+        function openGhGuide(){
+          var s1 = $("#ghStep1"), s2 = $("#ghStep2");
+          if(s1){ s1.style.display = ""; }
+          if(s2){ s2.style.display = "none"; }
+          openModal("gh");
+        }
         if(ghBtn && ghStatus){
-        ghBtn.addEventListener("click", function(){
-          ghOn = !ghOn;
-          ghBtn.classList.toggle("connected", ghOn);
-          ghBtn.textContent = ghOn ? "Connected as @danielreyes" : "Connect GitHub";
-          ghStatus.textContent = ghOn
-            ? "Connected. Publishing will push to your own GitHub account."
-            : "Connect GitHub to publish your site to your own account.";
-          toast(ghOn ? "GitHub connected (preview) — publishing now targets your account." : "GitHub disconnected (preview).");
-        });
+          ghBtn.addEventListener("click", function(){ openGhGuide(); });
+        }
+        var ghNextBtn = $("#ghNextBtn");
+        if(ghNextBtn){
+          ghNextBtn.addEventListener("click", function(){
+            $("#ghStep1").style.display = "none";
+            $("#ghStep2").style.display = "";
+          });
+        }
+        var ghBackBtn = $("#ghBackBtn");
+        if(ghBackBtn){
+          ghBackBtn.addEventListener("click", function(){
+            $("#ghStep2").style.display = "none";
+            $("#ghStep1").style.display = "";
+          });
+        }
+        var ghConnectBtn = $("#ghConnectBtn");
+        if(ghConnectBtn){
+          ghConnectBtn.addEventListener("click", function(){
+            var inp = $("#gh-username");
+            ghUser = inp && inp.value.trim() ? inp.value.trim().replace(/^@/, "") : "danielreyes";
+            ghOn = true;
+            ghBtn.classList.add("connected");
+            ghBtn.textContent = "Connected as @" + ghUser;
+            ghStatus.textContent = "Connected. Publishing will push to your own GitHub account.";
+            closeModals();
+            toast("GitHub connected (preview) — publishing now targets @" + ghUser + ".");
+          });
         }
 
         /* ---------- dashboard: publish ---------- */
@@ -797,13 +841,22 @@
         if(pubBtn){
         pubBtn.addEventListener("click", function(){
           if(publishing) return;
+          if(!ghOn){
+            toast("Connect GitHub first — watch the quick guide.");
+            openGhGuide();
+            return;
+          }
           publishing = true;
           var original = pubBtn.innerHTML;
           pubBtn.textContent = "Publishing…";
           setTimeout(function(){
             pubBtn.classList.add("done");
             pubBtn.innerHTML = "Published — site is live";
-            toast("Published! danielreyes.github.io is live with your latest changes (preview).");
+            var lu = $("#liveUrl");
+            if(lu){ lu.textContent = ghUser + ".github.io"; }
+            var dashEl = $(".dash");
+            if(dashEl){ dashEl.classList.remove("no-link"); }
+            toast("Published! " + ghUser + ".github.io is live with your latest changes (preview).");
             setTimeout(function(){
               pubBtn.classList.remove("done");
               pubBtn.innerHTML = original;
