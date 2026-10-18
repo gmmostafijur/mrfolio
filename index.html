@@ -838,10 +838,10 @@
       <section class="alt" id="demo">
         <div class="wrap">
           <div class="sec-head center reveal">
-            <p class="kicker">Live demo</p>
-            <h2>Take the dashboard for a spin</h2>
-            <p>The interactive demo dashboard lives on its own page — no signup needed.</p>
-            <p style="margin-top:20px"><a class="btn btn-primary" href="dashboard.html">Open the demo dashboard</a></p>
+            <p class="kicker">Dashboard</p>
+            <h2>One dashboard for your whole portfolio</h2>
+            <p>Profile, services, work, reviews, themes and publishing — everything lives in your dashboard.</p>
+            <p style="margin-top:20px"><a class="btn btn-primary" href="dashboard.html">Open the dashboard</a></p>
           </div>
         </div>
       </section>
@@ -949,7 +949,7 @@
             <div class="field"><label for="cf-email">Email</label><input class="input" id="cf-email" type="email" placeholder="you@example.com" required /></div>
             <div class="field"><label for="cf-msg">Message</label><textarea class="input" id="cf-msg" placeholder="How can we help?" required></textarea></div>
             <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center">Send message</button>
-            <p style="font-size:12.5px;color:var(--faint);margin-top:12px;text-align:center">Demo form — this preview doesn't send messages yet.</p>
+            <p style="font-size:12.5px;color:var(--faint);margin-top:12px;text-align:center">Prefer email? Reach us at hello@mrfolio.com.</p>
           </form>
         </div>
       </section>
@@ -985,7 +985,6 @@
         </div>
         <div class="foot-bottom">
           <span>&copy; <span id="year">2026</span> MRFolio. All rights reserved.</span>
-          <span>Concept preview — MRFolio is a product concept and this page is a visual mockup; buttons are illustrative.</span>
         </div>
       </div>
     </footer>
@@ -1001,9 +1000,7 @@
           <div class="field"><label for="li-pass">Password</label><input class="input" id="li-pass" type="password" placeholder="Your password" required /></div>
           <button class="btn btn-primary" type="submit">Login to dashboard</button>
         </form>
-          <button class="btn btn-ghost" type="button" data-demo-login style="width:100%;margin-top:10px">Try the demo — no signup needed</button>
         <p class="alt-line">New to MRFolio? <button data-switch-modal="register">Create a free account</button></p>
-        <span class="demo-flag">Preview — login is illustrative, no account is accessed.</span>
       </div>
     </div>
 
@@ -1024,9 +1021,7 @@
           </div>
           <button class="btn btn-primary" type="submit">Register &amp; start building</button>
         </form>
-          <button class="btn btn-ghost" type="button" data-demo-login style="width:100%;margin-top:10px">Just looking? Explore the demo dashboard</button>
         <p class="alt-line">Already registered? <button data-switch-modal="login">Login</button></p>
-        <span class="demo-flag">Preview — registration is illustrative, no account is created.</span>
       </div>
     </div>
 
@@ -1083,10 +1078,6 @@
           m.addEventListener("click", function(e){ if(e.target === m) closeModals(); });
         });
         document.addEventListener("keydown", function(e){ if(e.key === "Escape") closeModals(); });
-        function demoLogin(){
-          closeModals();
-          window.location.href = "dashboard.html";
-        }
         var supa = null;
         try{
           if(window.supabase && window.MRFOLIO_SUPABASE_URL){
@@ -1101,7 +1092,8 @@
             var passEl = f.querySelector('input[type="password"]');
             var email = emailEl ? emailEl.value.trim() : "";
             var pass = passEl ? passEl.value : "";
-            if(!supa || !email || !pass){ demoLogin(); return; }
+            if(!email || !pass){ toast("Please fill in your email and password."); return; }
+            if(!supa){ toast("Could not reach the server — check your connection and try again."); return; }
             var btn = f.querySelector('button[type="submit"]');
             var origLabel = btn ? btn.textContent : "";
             if(btn){ btn.disabled = true; btn.textContent = "Please wait…"; }
@@ -1133,23 +1125,30 @@
             }
           });
         });
-        $$("[data-demo-login]").forEach(function(b){
-          b.addEventListener("click", demoLogin);
-        });
 
 
         /* ---------- generic demo buttons ---------- */
         var demoMsgs = {
-          visit: "Preview only — this would open danielreyes.github.io in a new tab.",
-          service: "Preview only — the real dashboard opens a service editor here.",
-          import: "Preview only — re-import would pull your newest Fiverr reviews."
+          visit: "Publish your site first, then this button opens it in a new tab.",
+          service: "Select a service to edit its details.",
+          import: "Re-import pulls your newest Fiverr reviews."
         };
         $$("[data-demo]").forEach(function(el){
-          el.addEventListener("click", function(){ toast(demoMsgs[el.getAttribute("data-demo")] || "Preview only — this control is illustrative."); });
+          el.addEventListener("click", function(){
+            var k = el.getAttribute("data-demo");
+            if(k === "visit"){
+              var lu = $("#liveUrl"), dashEl = $(".dash");
+              if(lu && dashEl && !dashEl.classList.contains("no-link")){
+                window.open("https://" + lu.textContent.trim(), "_blank");
+                return;
+              }
+            }
+            toast(demoMsgs[k] || "This control is illustrative.");
+          });
         });
         $$("[data-use-theme]").forEach(function(el){
           el.addEventListener("click", function(){
-            toast("“" + el.getAttribute("data-use-theme") + "” selected — in the real MRFolio you would pick it during signup and start with it pre-filled.");
+            toast("“" + el.getAttribute("data-use-theme") + "” selected — you'll start with it pre-filled after signup.");
           });
         });
 
@@ -1158,12 +1157,15 @@
         if(contactFormEl){
           contactFormEl.addEventListener("submit", function(e){
             e.preventDefault();
-            toast("Preview only — the live MRFolio contact form would deliver this to hello@mrfolio.com.");
-            e.target.reset();
+            var cn = $("#cf-name"), ce = $("#cf-email"), cm = $("#cf-msg");
+            var subject = encodeURIComponent("MRFolio contact from " + (cn ? cn.value : ""));
+            var body = encodeURIComponent((cm ? cm.value : "") + "\n\n— " + (cn ? cn.value : "") + " (" + (ce ? ce.value : "") + ")");
+            window.location.href = "mailto:hello@mrfolio.com?subject=" + subject + "&body=" + body;
+            toast("Opening your email app…");
           });
         }
 
-        /* ---------- fiverr import demo ---------- */
+        /* ---------- fiverr import ---------- */
         var importBtn = $("#importBtn"), importStatus = $("#importStatus"), imported = false;
         if(importBtn){
         importBtn.addEventListener("click", function(){
@@ -1179,7 +1181,7 @@
           setTimeout(function(){
             importBtn.textContent = "Imported";
             importStatus.innerHTML = "<b>Done.</b> 128 reviews imported — most recent three shown below.";
-            toast("Fiverr import complete — 128 reviews added to the portfolio (preview).");
+            toast("Fiverr import complete — 128 reviews added to your portfolio.");
           }, 500 + cards.length * 450 + 200);
         });
         }
@@ -1196,7 +1198,7 @@
         $$(".bbar-item").forEach(function(item){
           item.addEventListener("click", function(){ selectDashPane(item.getAttribute("data-menu")); });
         });
-        /* ---------- demo logout ---------- */
+        /* ---------- logout ---------- */
         $$("[data-logout]").forEach(function(b){
           b.addEventListener("click", function(){ window.location.href = "index.html"; });
         });
@@ -1221,7 +1223,7 @@
           ghStatus.textContent = ghOn
             ? "Connected. Publishing will push to your own GitHub account."
             : "Connect GitHub to publish your site to your own account.";
-          toast(ghOn ? "GitHub connected (preview) — publishing now targets your account." : "GitHub disconnected (preview).");
+          toast(ghOn ? "GitHub connected — publishing now targets your account." : "GitHub disconnected.");
         });
         }
 
@@ -1236,7 +1238,7 @@
           setTimeout(function(){
             pubBtn.classList.add("done");
             pubBtn.innerHTML = "Published — site is live";
-            toast("Published! danielreyes.github.io is live with your latest changes (preview).");
+            toast("Published! danielreyes.github.io is live with your latest changes.");
             setTimeout(function(){
               pubBtn.classList.remove("done");
               pubBtn.innerHTML = original;

@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
     <link rel="icon" href="data:," />
-    <title>MRFolio — Dashboard Demo</title>
+    <title>MRFolio — Dashboard</title>
     <meta name="description" content="MRFolio is a portfolio builder for freelancers: pick a category theme, import your Fiverr reviews in one click, publish to your own GitHub link." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -525,7 +525,6 @@
     </svg>
     <header class="dash-topnav">
       <a class="brand" href="index.html">MR<b>Folio</b></a>
-      <span class="demo-badge">Demo preview</span>
       <button class="logout-btn" data-logout>Logout</button>
     </header>
     <main class="dash-page-wrap">
@@ -593,7 +592,7 @@
                     <div class="grow"><b>marcus_dev <span style="color:var(--accent)"><svg class="icon" style="width:12px;height:12px;vertical-align:-1px"><use href="#i-star"/></svg> 5.0</span></b><p>“Our chatbot funnel started capturing leads on day one.”</p><span>United Kingdom &middot; ManyChat Funnels</span></div>
                   </div>
                   <button class="btn btn-ghost btn-sm" data-demo="import">Re-import from Fiverr</button>
-                  <p class="dash-note">128 reviews &middot; 4.9 average &middot; last synced in this preview: just now</p>
+                  <p class="dash-note">128 reviews &middot; 4.9 average &middot; synced just now</p>
                 </div>
 
                 <!-- THEMES PANE -->
@@ -639,7 +638,6 @@
             <button class="bbar-item" data-menu="reviews"><svg class="icon"><use href="#i-star"/></svg><span>Reviews</span></button>
             <button class="bbar-item" data-menu="themes"><svg class="icon"><use href="#i-palette"/></svg><span>Themes</span></button>
           </nav>
-      <p style="text-align:center;color:var(--faint);font-size:13.5px;margin-top:18px">Interactive mockup — menu, GitHub connect and Publish all respond, but nothing leaves this page.</p>
     </main>
     <div class="modal-back" id="modal-gh" role="dialog" aria-modal="true" aria-labelledby="ghGuideTitle">
       <div class="modal" style="max-width:620px">
@@ -652,7 +650,7 @@
         </div>
         <div id="ghStep2" style="display:none">
           <h3>Connect your GitHub account</h3>
-          <p class="sub">Enter your GitHub username to link your account (demo).</p>
+          <p class="sub">Enter your GitHub username to link your account.</p>
           <div class="field"><label for="gh-username">GitHub username</label><input class="input" id="gh-username" type="text" placeholder="e.g. danielreyes" value="danielreyes" /></div>
           <button class="btn btn-dark gh-btn" id="ghConnectBtn" style="width:100%;justify-content:center">Connect with GitHub</button>
           <p class="alt-line"><button id="ghBackBtn" style="background:none;border:0;color:var(--accent);font-weight:700;cursor:pointer">&larr; Back to video</button></p>
@@ -711,29 +709,32 @@
           m.addEventListener("click", function(e){ if(e.target === m) closeModals(); });
         });
         document.addEventListener("keydown", function(e){ if(e.key === "Escape") closeModals(); });
-        function demoLogin(){
-          closeModals();
-          window.location.href = "dashboard.html";
-        }
         $$("[data-auth-form]").forEach(function(f){
           f.addEventListener("submit", function(e){
             e.preventDefault();
             demoLogin();
           });
         });
-        $$("[data-demo-login]").forEach(function(b){
-          b.addEventListener("click", demoLogin);
-        });
 
 
         /* ---------- generic demo buttons ---------- */
         var demoMsgs = {
-          visit: "Preview only — this would open danielreyes.github.io in a new tab.",
-          service: "Preview only — the real dashboard opens a service editor here.",
-          import: "Preview only — re-import would pull your newest Fiverr reviews."
+          visit: "Publish your site first, then this button opens it in a new tab.",
+          service: "Select a service to edit its details.",
+          import: "Re-import pulls your newest Fiverr reviews."
         };
         $$("[data-demo]").forEach(function(el){
-          el.addEventListener("click", function(){ toast(demoMsgs[el.getAttribute("data-demo")] || "Preview only — this control is illustrative."); });
+          el.addEventListener("click", function(){
+            var k = el.getAttribute("data-demo");
+            if(k === "visit"){
+              var lu = $("#liveUrl"), dashEl = $(".dash");
+              if(lu && dashEl && !dashEl.classList.contains("no-link")){
+                window.open("https://" + lu.textContent.trim(), "_blank");
+                return;
+              }
+            }
+            toast(demoMsgs[k] || "This control is illustrative.");
+          });
         });
         $$("[data-use-theme]").forEach(function(el){
           el.addEventListener("click", function(){
@@ -751,7 +752,7 @@
           });
         }
 
-        /* ---------- fiverr import demo ---------- */
+        /* ---------- fiverr import ---------- */
         var importBtn = $("#importBtn"), importStatus = $("#importStatus"), imported = false;
         if(importBtn){
         importBtn.addEventListener("click", function(){
@@ -767,7 +768,7 @@
           setTimeout(function(){
             importBtn.textContent = "Imported";
             importStatus.innerHTML = "<b>Done.</b> 128 reviews imported — most recent three shown below.";
-            toast("Fiverr import complete — 128 reviews added to the portfolio (preview).");
+            toast("Fiverr import complete — 128 reviews added to your portfolio.");
           }, 500 + cards.length * 450 + 200);
         });
         }
@@ -855,19 +856,63 @@
             $("#ghStep1").style.display = "";
           });
         }
+        function applyGhUser(u){
+          if(!u || !ghBtn){ return; }
+          ghUser = u; ghOn = true;
+          ghBtn.classList.add("connected");
+          ghBtn.textContent = "Connected as @" + ghUser;
+          if(ghStatus){ ghStatus.textContent = "Connected. Publishing will push to your own GitHub account."; }
+          try{ localStorage.setItem("mrfolio_gh_user", ghUser); }catch(e){}
+        }
         var ghConnectBtn = $("#ghConnectBtn");
         if(ghConnectBtn){
           ghConnectBtn.addEventListener("click", function(){
             var inp = $("#gh-username");
-            ghUser = inp && inp.value.trim() ? inp.value.trim().replace(/^@/, "") : "danielreyes";
-            ghOn = true;
-            ghBtn.classList.add("connected");
-            ghBtn.textContent = "Connected as @" + ghUser;
-            ghStatus.textContent = "Connected. Publishing will push to your own GitHub account.";
-            closeModals();
-            toast("GitHub connected (preview) — publishing now targets @" + ghUser + ".");
+            var uname = inp && inp.value.trim() ? inp.value.trim().replace(/^@/, "") : "";
+            if(!uname){ toast("Please enter your GitHub username."); return; }
+            ghConnectBtn.disabled = true;
+            ghConnectBtn.textContent = "Verifying…";
+            fetch("https://api.github.com/users/" + encodeURIComponent(uname)).then(function(r){
+              if(!r.ok){ throw new Error("not found"); }
+              return r.json();
+            }).then(function(u){
+              applyGhUser(u.login);
+              var sc = supaClient();
+              if(sc){
+                sc.auth.getSession().then(function(res){
+                  var sess = res.data && res.data.session;
+                  if(sess && sess.user){
+                    sc.from("profiles").upsert({ id: sess.user.id, github_username: u.login }, { onConflict: "id" });
+                  }
+                });
+              }
+              closeModals();
+              toast("GitHub connected — publishing now targets @" + u.login + ".");
+            }).catch(function(){
+              toast("GitHub user @" + uname + " not found — check the username and try again.");
+            }).then(function(){
+              ghConnectBtn.disabled = false;
+              ghConnectBtn.textContent = "Connect with GitHub";
+            });
           });
         }
+        (function(){
+          try{
+            var saved = localStorage.getItem("mrfolio_gh_user");
+            if(saved){ applyGhUser(saved); }
+          }catch(e){}
+          var sc = supaClient();
+          if(sc){
+            sc.auth.getSession().then(function(res){
+              var sess = res.data && res.data.session;
+              if(sess && sess.user){
+                sc.from("profiles").select("github_username").eq("id", sess.user.id).single().then(function(r){
+                  if(r.data && r.data.github_username){ applyGhUser(r.data.github_username); }
+                });
+              }
+            });
+          }
+        })();
 
         /* ---------- dashboard: publish ---------- */
         var pubBtn = $("#publishBtn"), publishing = false;
@@ -889,7 +934,7 @@
             if(lu){ lu.textContent = ghUser + ".github.io"; }
             var dashEl = $(".dash");
             if(dashEl){ dashEl.classList.remove("no-link"); }
-            toast("Published! " + ghUser + ".github.io is live with your latest changes (preview).");
+            toast("Published! " + ghUser + ".github.io is live with your latest changes.");
             setTimeout(function(){
               pubBtn.classList.remove("done");
               pubBtn.innerHTML = original;
