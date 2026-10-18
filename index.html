@@ -1032,6 +1032,8 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
     <script>
       (function(){
         "use strict";
@@ -1085,10 +1087,50 @@
           closeModals();
           window.location.href = "dashboard.html";
         }
+        var supa = null;
+        try{
+          if(window.supabase && window.MRFOLIO_SUPABASE_URL){
+            supa = window.supabase.createClient(window.MRFOLIO_SUPABASE_URL, window.MRFOLIO_SUPABASE_ANON_KEY);
+          }
+        }catch(err){ supa = null; }
         $$("[data-auth-form]").forEach(function(f){
           f.addEventListener("submit", function(e){
             e.preventDefault();
-            demoLogin();
+            var kind = f.getAttribute("data-auth-form");
+            var emailEl = f.querySelector('input[type="email"]');
+            var passEl = f.querySelector('input[type="password"]');
+            var email = emailEl ? emailEl.value.trim() : "";
+            var pass = passEl ? passEl.value : "";
+            if(!supa || !email || !pass){ demoLogin(); return; }
+            var btn = f.querySelector('button[type="submit"]');
+            var origLabel = btn ? btn.textContent : "";
+            if(btn){ btn.disabled = true; btn.textContent = "Please wait…"; }
+            function fail(msg){
+              if(btn){ btn.disabled = false; btn.textContent = origLabel; }
+              toast(msg);
+            }
+            if(kind === "register"){
+              var nameEl = f.querySelector('input[type="text"]');
+              supa.auth.signUp({
+                email: email, password: pass,
+                options: { data: { full_name: nameEl ? nameEl.value : "" } }
+              }).then(function(res){
+                if(res.error){ fail(res.error.message); return; }
+                closeModals();
+                if(btn){ btn.disabled = false; btn.textContent = origLabel; }
+                if(res.data && res.data.session){
+                  window.location.href = "dashboard.html";
+                }else{
+                  toast("Account created! Check your email to confirm, then login.");
+                }
+              });
+            }else{
+              supa.auth.signInWithPassword({ email: email, password: pass }).then(function(res){
+                if(res.error){ fail(res.error.message); return; }
+                closeModals();
+                window.location.href = "dashboard.html";
+              });
+            }
           });
         });
         $$("[data-demo-login]").forEach(function(b){

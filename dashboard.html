@@ -660,7 +660,9 @@
       </div>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>
       (function(){
         "use strict";
         var $ = function(s, c){ return (c||document).querySelector(s); };
@@ -782,10 +784,41 @@
         $$(".bbar-item").forEach(function(item){
           item.addEventListener("click", function(){ selectDashPane(item.getAttribute("data-menu")); });
         });
-        /* ---------- demo logout ---------- */
+        /* ---------- logout (Supabase signOut when connected) ---------- */
+        function supaClient(){
+          try{
+            if(window.supabase && window.MRFOLIO_SUPABASE_URL){
+              return window.supabase.createClient(window.MRFOLIO_SUPABASE_URL, window.MRFOLIO_SUPABASE_ANON_KEY);
+            }
+          }catch(err){}
+          return null;
+        }
         $$("[data-logout]").forEach(function(b){
-          b.addEventListener("click", function(){ window.location.href = "index.html"; });
+          b.addEventListener("click", function(){
+            var sc = supaClient();
+            if(sc){
+              sc.auth.signOut().then(function(){ window.location.href = "index.html"; });
+            }else{
+              window.location.href = "index.html";
+            }
+          });
         });
+        (function(){
+          var sc = supaClient();
+          if(!sc){ return; }
+          sc.auth.getSession().then(function(res){
+            var sess = res.data && res.data.session;
+            if(!sess || !sess.user){ return; }
+            var em = sess.user.email || "";
+            var who = document.querySelector(".dash-side .who");
+            if(who){
+              var nm = who.querySelector("b"), pl = who.querySelector("span");
+              if(nm){ nm.textContent = em.split("@")[0] || em; }
+              if(pl){ pl.textContent = "Logged in"; }
+            }
+            toast("Welcome back, " + em);
+          });
+        })();
 
         /* ---------- dashboard: theme picker ---------- */
         var themeNote = $("#themeNote");
