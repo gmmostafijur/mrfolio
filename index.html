@@ -1021,6 +1021,12 @@
           </div>
           <button class="btn btn-primary" type="submit">Register &amp; start building</button>
         </form>
+        <div id="otpBox" style="display:none">
+          <p class="sub">We sent a 6-digit confirmation code to <b id="otpEmail"></b>. Enter it below:</p>
+          <div class="field"><label for="otp-code">Confirmation code</label><input class="input" id="otp-code" type="text" inputmode="numeric" placeholder="6-digit code" maxlength="6" autocomplete="one-time-code" /></div>
+          <button class="btn btn-primary" id="otpVerifyBtn" type="button">Verify &amp; start building</button>
+          <p class="alt-line">Didn't get the code? <button id="otpResendBtn" type="button" style="background:none;border:0;color:var(--accent);font-weight:700;cursor:pointer">Resend code</button></p>
+        </div>
         <p class="alt-line">Already registered? <button data-switch-modal="login">Login</button></p>
       </div>
     </div>
@@ -1061,6 +1067,17 @@
           $$(".modal-back").forEach(function(m){ m.classList.remove("open"); });
           var m = $("#modal-" + name);
           if(m) m.classList.add("open");
+          if(name === "register") resetOtpBox();
+        }
+        function resetOtpBox(){
+          var box = $("#otpBox");
+          if(box) box.style.display = "none";
+          var frm = document.querySelector('#modal-register [data-auth-form="register"]');
+          if(frm) frm.style.display = "";
+          var alt = document.querySelector("#modal-register .alt-line");
+          if(alt) alt.style.display = "";
+          var code = $("#otp-code");
+          if(code) code.value = "";
         }
         function closeModals(){ $$(".modal-back").forEach(function(m){ m.classList.remove("open"); }); }
         $$("[data-open-modal]").forEach(function(el){
@@ -1108,12 +1125,21 @@
                 options: { data: { full_name: nameEl ? nameEl.value : "" } }
               }).then(function(res){
                 if(res.error){ fail(res.error.message); return; }
-                closeModals();
                 if(btn){ btn.disabled = false; btn.textContent = origLabel; }
                 if(res.data && res.data.session){
+                  closeModals();
                   window.location.href = "dashboard.html";
                 }else{
-                  toast("Account created! Check your email to confirm, then login.");
+                  /* email confirmation required — show 6-digit code entry */
+                  pendingEmail = email;
+                  f.style.display = "none";
+                  var alt = f.parentElement.querySelector(".alt-line");
+                  if(alt) alt.style.display = "none";
+                  $("#otpEmail").textContent = email;
+                  var codeEl = $("#otp-code");
+                  if(codeEl) codeEl.value = "";
+                  $("#otpBox").style.display = "";
+                  toast("Account created! Enter the 6-digit code from your email.");
                 }
               });
             }else{
@@ -1126,6 +1152,42 @@
           });
         });
 
+
+        /* ---------- email OTP verification (6-digit code) ---------- */
+        var pendingEmail = "";
+        var otpBtn = $("#otpVerifyBtn");
+        if(otpBtn) otpBtn.addEventListener("click", function(){
+          var codeEl = $("#otp-code");
+          var code = codeEl ? codeEl.value.trim() : "";
+          if(code.length < 6){ toast("Enter the 6-digit code from your email."); return; }
+          if(!supa || !pendingEmail){ toast("Something went wrong — please register again."); return; }
+          otpBtn.disabled = true; otpBtn.textContent = "Verifying…";
+          supa.auth.verifyOtp({ email: pendingEmail, token: code, type: "signup" }).then(function(res){
+            otpBtn.disabled = false; otpBtn.textContent = "Verify & start building";
+            if(res.error){ toast(res.error.message); return; }
+            closeModals();
+            window.location.href = "dashboard.html";
+          });
+        });
+        var otpResend = $("#otpResendBtn");
+        if(otpResend) otpResend.addEventListener("click", function(){
+          if(!supa || !pendingEmail) return;
+          supa.auth.resend({ type: "signup", email: pendingEmail }).then(function(res){
+            toast(res.error ? res.error.message : "Code resent — check your email.");
+          });
+        });
+
+        /* ---------- magic-link fallback: confirmation link lands here ---------- */
+        try{
+          if(supa && window.location.hash && window.location.hash.indexOf("access_token") !== -1){
+            supa.auth.getSession().then(function(res){
+              if(res.data && res.data.session){
+                toast("Email confirmed — taking you to your dashboard…");
+                setTimeout(function(){ window.location.href = "dashboard.html"; }, 1200);
+              }
+            });
+          }
+        }catch(e){}
 
         /* ---------- generic demo buttons ---------- */
         var demoMsgs = {
