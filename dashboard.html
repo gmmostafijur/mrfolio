@@ -715,6 +715,7 @@
     </div>
 
     <div class="toast" id="toast"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <script>
       "use strict";
@@ -1566,7 +1567,10 @@
       async function init(){
         bindGlobal();
         var ok = await loadAll();
-        if(!ok) return;
+        if(!ok){
+          $("#dashMain").innerHTML = emptyState("Could not load your dashboard", "Check your internet connection and refresh. If it keeps happening, please contact support.");
+          return;
+        }
         paintPlan();
         buildNav();
         buildPanes();
