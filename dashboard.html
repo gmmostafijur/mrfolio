@@ -551,7 +551,8 @@
       .stat-card{background:#14151d;border:1px solid #23252f;border-radius:14px;padding:18px}
       .stat-card b{font-size:26px;color:#f0eee6;display:block}
       .stat-card span{font-size:12.5px;color:#8f8d84}
-      .bill-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+      .bill-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+      @media(max-width:1020px){.bill-grid{grid-template-columns:1fr 1fr}}
       @media(max-width:640px){.bill-grid{grid-template-columns:1fr}}
       .bill-card{background:#14151d;border:1px solid #23252f;border-radius:16px;padding:22px}
       .bill-card.pro{border-color:rgba(237,166,60,.45);background:rgba(237,166,60,.05)}
@@ -720,8 +721,8 @@
       /* ================= MRFolio dashboard ================= */
       /* ---------- config ---------- */
       var ADMIN_EMAIL = "gmmostafizur331@gmail.com";
-      var PRO_PRICE_BDT = 499;
-      var PAY_NUMBERS = { bkash: "01XXXXXXXXX", nagad: "01XXXXXXXXX", rocket: "01XXXXXXXXX" };
+      var PRICING = { monthly: 20, yearly: 192 }; /* yearly = 20 x 12 minus 20% */
+      var PAY_NUMBERS = { bkash: "01907239952", nagad: "01907239952", rocket: "01907239952" };
 
       /* ---------- helpers ---------- */
       function $(s, c){ return (c || document).querySelector(s); }
@@ -1287,6 +1288,11 @@
         var body = $("#billingBody"); if(!body) return;
         var pro = isPro();
         var badge = state.isAdmin ? " (admin)" : "";
+        var feats = '<li><svg class="icon"><use href="#i-check"/></svg>Everything in Free</li>' +
+          '<li><svg class="icon"><use href="#i-check"/></svg>Certifications section</li>' +
+          '<li><svg class="icon"><use href="#i-check"/></svg>Skills section</li>' +
+          '<li><svg class="icon"><use href="#i-check"/></svg>FAQ section</li>' +
+          '<li><svg class="icon"><use href="#i-check"/></svg>5 extra premium themes</li>';
         var html = '<div class="bill-grid">' +
           '<div class="bill-card"><h4>Free</h4><div class="price">৳0 <small>forever</small></div><ul>' +
           '<li><svg class="icon"><use href="#i-check"/></svg>Profile, stats, services, work, reviews</li>' +
@@ -1296,17 +1302,16 @@
           '<li><svg class="icon"><use href="#i-check"/></svg>GitHub publishing</li></ul>' +
           (pro ? '<span class="status-pill active">CURRENT PLAN' + badge + "</span>"
                : '<button class="btn btn-ghost btn-sm" disabled>Current plan</button>') + "</div>" +
-          '<div class="bill-card pro"><h4>Pro 👑</h4><div class="price">৳' + PRO_PRICE_BDT + " <small>/ lifetime</small></div><ul>" +
-          '<li><svg class="icon"><use href="#i-check"/></svg>Everything in Free</li>' +
-          '<li><svg class="icon"><use href="#i-check"/></svg>Certifications section</li>' +
-          '<li><svg class="icon"><use href="#i-check"/></svg>Skills section</li>' +
-          '<li><svg class="icon"><use href="#i-check"/></svg>FAQ section</li>' +
-          '<li><svg class="icon"><use href="#i-check"/></svg>5 extra premium themes</li></ul>' +
+          '<div class="bill-card pro"><h4>Pro Monthly</h4><div class="price">৳' + PRICING.monthly + " <small>/ month</small></div><ul>" + feats + "</ul>" +
           (pro ? '<span class="status-pill approved">PRO ACTIVE' + badge + "</span>"
-               : '<button class="btn btn-primary btn-sm" id="goProBtn">Upgrade to Pro</button>') + "</div></div>";
+               : '<button class="btn btn-primary btn-sm" data-cycle="monthly">Choose Monthly</button>') + "</div>" +
+          '<div class="bill-card pro"><h4>Pro Yearly</h4><div class="price">৳' + PRICING.yearly + ' <small>/ year</small></div><div style="margin:6px 0"><span class="status-pill approved">SAVE 20%</span></div><ul>' + feats + "</ul>" +
+          (pro ? '<span class="status-pill approved">PRO ACTIVE' + badge + "</span>"
+               : '<button class="btn btn-primary btn-sm" data-cycle="yearly">Choose Yearly</button>') + "</div></div>";
         if(!pro){
-          html += '<div class="pay-box" id="payBox" style="display:none"><h4 style="font-size:15px;margin:0 0 4px">Pay with mobile banking</h4>' +
-            '<p class="sub" style="margin:0 0 6px">Send <b>৳' + PRO_PRICE_BDT + "</b> to any of these personal numbers, then submit your transaction ID below. The admin approves within 24 hours.</p>" +
+          html += '<div class="pay-box" id="payBox" style="display:none">' +
+            '<h4 style="font-size:15px;margin:0 0 4px">Pay with mobile banking — <span id="payCycleLabel"></span></h4>' +
+            '<p class="sub" style="margin:0 0 6px">Send <b id="payAmountLabel"></b> to any of these personal numbers, then submit your transaction ID below. The admin approves within 24 hours.</p>' +
             [["bkash","bKash"],["nagad","Nagad"],["rocket","Rocket"]].map(function(m){
               return '<div class="pay-num"><span>' + m[1] + ' Personal</span><span><b>' + esc(PAY_NUMBERS[m[0]]) + '</b> <button data-copy="' + esc(PAY_NUMBERS[m[0]]) + '">Copy</button></span></div>';
             }).join("") +
@@ -1317,8 +1322,16 @@
             '<div id="myPayments" style="margin-top:16px"></div>';
         }
         body.innerHTML = html;
-        var g = $("#goProBtn");
-        if(g) g.addEventListener("click", function(){ $("#payBox").style.display = ""; g.style.display = "none"; });
+        var cycle = "monthly";
+        $$("[data-cycle]", body).forEach(function(b){
+          b.addEventListener("click", function(){
+            cycle = b.getAttribute("data-cycle");
+            $("#payBox").style.display = "";
+            $("#payCycleLabel").textContent = cycle === "monthly" ? "Pro Monthly" : "Pro Yearly";
+            $("#payAmountLabel").textContent = "৳" + (cycle === "monthly" ? PRICING.monthly : PRICING.yearly);
+            $("#payBox").scrollIntoView({ behavior: "smooth", block: "center" });
+          });
+        });
         $$("[data-copy]", body).forEach(function(b){
           b.addEventListener("click", function(){
             var v = b.getAttribute("data-copy");
@@ -1327,17 +1340,21 @@
           });
         });
         var ps = $("#paySubmit");
-        if(ps) ps.addEventListener("click", submitPayment);
+        if(ps) ps.addEventListener("click", function(){ submitPayment(cycle); });
         if(!pro) loadMyPayments();
       }
-      async function submitPayment(){
+      function cycleLabel(plan){ return plan === "pro_yearly" ? "Yearly" : "Monthly"; }
+      async function submitPayment(cycle){
+        cycle = cycle || "monthly";
+        var amount = cycle === "monthly" ? PRICING.monthly : PRICING.yearly;
+        var plan = cycle === "monthly" ? "pro_monthly" : "pro_yearly";
         var method = $("#pay-method").value;
         var sender = $("#pay-sender").value.trim();
         var trx = $("#pay-trx").value.trim().toUpperCase();
         if(!sender || !trx){ toast("Enter your sender number and transaction ID."); return; }
         var sc = supaClient();
         var r = await sc.from("payment_requests").insert({
-          user_id: state.user.id, plan: "pro", amount_bdt: PRO_PRICE_BDT,
+          user_id: state.user.id, plan: plan, amount_bdt: amount,
           method: method, sender_number: sender, trx_id: trx, status: "pending"
         });
         if(r.error){ toast("Submit failed: " + r.error.message); return; }
@@ -1351,7 +1368,7 @@
         if(r.error || !r.data || !r.data.length){ el.innerHTML = ""; return; }
         el.innerHTML = "<h4 style='font-size:14px;margin:0 0 6px'>My payment requests</h4>" + r.data.map(function(x){
           return '<div class="le-item"><div class="le-body"><b>' + esc(x.trx_id) + ' <span class="status-pill ' + esc(x.status) + '">' + esc(x.status.toUpperCase()) + "</span></b>" +
-            "<span>" + esc(x.method) + " · ৳" + esc(x.amount_bdt) + " · " + new Date(x.created_at).toLocaleDateString() + "</span></div></div>";
+            "<span>" + esc(cycleLabel(x.plan)) + " · " + esc(x.method) + " · ৳" + esc(x.amount_bdt) + " · " + new Date(x.created_at).toLocaleDateString() + "</span></div></div>";
         }).join("");
       }
 
@@ -1377,13 +1394,13 @@
         if(!(pays.data || []).length){
           html += emptyState("No payment requests", "When a user pays via bKash/Nagad/Rocket, it appears here.");
         } else {
-          html += '<div style="overflow-x:auto"><table class="admin-table"><tr><th>User</th><th>Method</th><th>Sender</th><th>TrxID</th><th>Amount</th><th>Status</th><th></th></tr>' +
+          html += '<div style="overflow-x:auto"><table class="admin-table"><tr><th>User</th><th>Plan</th><th>Method</th><th>Sender</th><th>TrxID</th><th>Amount</th><th>Status</th><th></th></tr>' +
             pays.data.map(function(x){
               var u = userById[x.user_id] || {};
               var act = x.status === "pending"
                 ? '<button class="le-del" style="border-color:#3fb950;color:#3fb950" data-approve="' + x.id + '" data-uid="' + x.user_id + '">Approve</button> ' +
                   '<button class="le-del" data-reject="' + x.id + '">Reject</button>' : "";
-              return "<tr><td>" + esc(u.email || String(x.user_id).slice(0, 8)) + "</td><td>" + esc(x.method) + "</td><td>" + esc(x.sender_number) +
+              return "<tr><td>" + esc(u.email || String(x.user_id).slice(0, 8)) + "</td><td>" + esc(cycleLabel(x.plan)) + "</td><td>" + esc(x.method) + "</td><td>" + esc(x.sender_number) +
                 "</td><td><b>" + esc(x.trx_id) + "</b></td><td>৳" + esc(x.amount_bdt) + '</td><td><span class="status-pill ' + esc(x.status) + '">' + esc(x.status.toUpperCase()) + "</span></td><td>" + act + "</td></tr>";
             }).join("") + "</table></div>";
         }
