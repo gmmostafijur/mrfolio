@@ -574,8 +574,8 @@
             <a href="#contact">Contact Us</a>
           </nav>
           <div class="nav-cta">
-            <button class="btn btn-ghost btn-sm login-link" data-open-modal="login">Login</button>
-            <button class="btn btn-primary btn-sm" data-open-modal="register">Get Started</button>
+            <a class="btn btn-ghost btn-sm login-link" href="auth.html">Login</a>
+            <a class="btn btn-primary btn-sm" href="auth.html?mode=register">Get Started</a>
             <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
               <svg class="icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
             </button>
@@ -588,8 +588,8 @@
           <a href="#about">About Us</a>
           <a href="#contact">Contact Us</a>
           <div class="row">
-            <button class="btn btn-ghost btn-sm" data-open-modal="login">Login</button>
-            <button class="btn btn-primary btn-sm" data-open-modal="register">Get Started</button>
+            <a class="btn btn-ghost btn-sm" href="auth.html">Login</a>
+            <a class="btn btn-primary btn-sm" href="auth.html?mode=register">Get Started</a>
           </div>
         </div>
       </div>
@@ -604,7 +604,7 @@
             <h1>Launch your freelancer portfolio in <span class="hl">10 minutes</span>.</h1>
             <p class="sub">Pick a theme made for your category, drop in your services and work — or pull your Fiverr reviews across in one click — then publish to your own link. No code, no hosting bills, no designer needed.</p>
             <div class="hero-ctas">
-              <button class="btn btn-primary" data-open-modal="register">Start building free <svg class="icon" style="width:16px;height:16px"><use href="#i-arrow"/></svg></button>
+              <a class="btn btn-primary" href="auth.html?mode=register">Start building free <svg class="icon" style="width:16px;height:16px"><use href="#i-arrow"/></svg></a>
               <a class="btn btn-ghost" href="#themes">Browse themes</a>
             </div>
             <p class="hero-note">Free plan included &middot; <b>No credit card</b> &middot; Your site lives on your own GitHub account</p>
@@ -874,7 +874,7 @@
                 <li class="off"><span class="tick"><svg class="icon" style="width:11px;height:11px"><use href="#i-x"/></svg></span>Auto-sync new Fiverr reviews</li>
                 <li class="off"><span class="tick"><svg class="icon" style="width:11px;height:11px"><use href="#i-x"/></svg></span>Custom domain &amp; badge removal</li>
               </ul>
-              <button class="btn btn-ghost" data-open-modal="register">Start free</button>
+              <a class="btn btn-ghost" href="auth.html?mode=register">Start free</a>
             </article>
             <article class="plan pro reveal">
               <span class="pop">MOST POPULAR</span>
@@ -890,7 +890,7 @@
                 <li><span class="tick"><svg class="icon" style="width:11px;height:11px"><use href="#i-check"/></svg></span>No MRFolio badge on your site</li>
                 <li><span class="tick"><svg class="icon" style="width:11px;height:11px"><use href="#i-check"/></svg></span>Priority support</li>
               </ul>
-              <button class="btn btn-primary" data-open-modal="register">Go Pro</button>
+              <a class="btn btn-primary" href="auth.html?mode=register">Go Pro</a>
             </article>
           </div>
         </div>
@@ -978,8 +978,8 @@
           </div>
           <div>
             <h4>Get started</h4>
-            <a href="#" data-open-modal="login">Login</a>
-            <a href="#" data-open-modal="register">Register — it's free</a>
+            <a href="auth.html">Login</a>
+            <a href="auth.html?mode=register">Register — it's free</a>
             <a href="#packages">See Pro</a>
           </div>
         </div>
@@ -989,47 +989,6 @@
       </div>
     </footer>
 
-    <!-- ================= LOGIN MODAL ================= -->
-    <div class="modal-back" id="modal-login" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
-      <div class="modal">
-        <button class="x" data-close-modal aria-label="Close">&times;</button>
-        <h3 id="loginTitle">Welcome back</h3>
-        <p class="sub">Login to your MRFolio dashboard.</p>
-        <form data-auth-form="login">
-          <div class="field"><label for="li-email">Email</label><input class="input" id="li-email" type="email" placeholder="you@example.com" required /></div>
-          <div class="field"><label for="li-pass">Password</label><input class="input" id="li-pass" type="password" placeholder="Your password" required /></div>
-          <button class="btn btn-primary" type="submit">Login to dashboard</button>
-        </form>
-        <p class="alt-line">New to MRFolio? <button data-switch-modal="register">Create a free account</button></p>
-      </div>
-    </div>
-
-    <!-- ================= REGISTER MODAL ================= -->
-    <div class="modal-back" id="modal-register" role="dialog" aria-modal="true" aria-labelledby="regTitle">
-      <div class="modal">
-        <button class="x" data-close-modal aria-label="Close">&times;</button>
-        <h3 id="regTitle">Create your portfolio</h3>
-        <p class="sub">Free plan — live link in about 10 minutes.</p>
-        <form data-auth-form="register">
-          <div class="field"><label for="rg-name">Full name</label><input class="input" id="rg-name" type="text" placeholder="e.g. Daniel Reyes" required /></div>
-          <div class="field"><label for="rg-email">Email</label><input class="input" id="rg-email" type="email" placeholder="you@example.com" required /></div>
-          <div class="field"><label for="rg-pass">Password</label><input class="input" id="rg-pass" type="password" placeholder="Create a password" required /></div>
-          <div class="field"><label for="rg-cat">I am a…</label>
-            <select class="input" id="rg-cat">
-              <option>Marketer</option><option>Developer</option><option>Designer</option><option>Photographer</option>
-            </select>
-          </div>
-          <button class="btn btn-primary" type="submit">Register &amp; start building</button>
-        </form>
-        <div id="otpBox" style="display:none">
-          <p class="sub">We sent a 6-digit confirmation code to <b id="otpEmail"></b>. Enter it below:</p>
-          <div class="field"><label for="otp-code">Confirmation code</label><input class="input" id="otp-code" type="text" inputmode="numeric" placeholder="6-digit code" maxlength="6" autocomplete="one-time-code" /></div>
-          <button class="btn btn-primary" id="otpVerifyBtn" type="button">Verify &amp; start building</button>
-          <p class="alt-line">Didn't get the code? <button id="otpResendBtn" type="button" style="background:none;border:0;color:var(--accent);font-weight:700;cursor:pointer">Resend code</button></p>
-        </div>
-        <p class="alt-line">Already registered? <button data-switch-modal="login">Login</button></p>
-      </div>
-    </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -1061,133 +1020,6 @@
             a.addEventListener("click", function(){ nav.classList.remove("open"); });
           });
         }
-
-        /* ---------- modals ---------- */
-        function openModal(name){
-          $$(".modal-back").forEach(function(m){ m.classList.remove("open"); });
-          var m = $("#modal-" + name);
-          if(m) m.classList.add("open");
-          if(name === "register") resetOtpBox();
-        }
-        function resetOtpBox(){
-          var box = $("#otpBox");
-          if(box) box.style.display = "none";
-          var frm = document.querySelector('#modal-register [data-auth-form="register"]');
-          if(frm) frm.style.display = "";
-          var alt = document.querySelector("#modal-register .alt-line");
-          if(alt) alt.style.display = "";
-          var code = $("#otp-code");
-          if(code) code.value = "";
-        }
-        function closeModals(){ $$(".modal-back").forEach(function(m){ m.classList.remove("open"); }); }
-        $$("[data-open-modal]").forEach(function(el){
-          el.addEventListener("click", function(e){
-            e.preventDefault();
-            nav.classList.remove("open");
-            openModal(el.getAttribute("data-open-modal"));
-          });
-        });
-        $$("[data-close-modal]").forEach(function(el){ el.addEventListener("click", closeModals); });
-        $$("[data-switch-modal]").forEach(function(el){
-          el.addEventListener("click", function(){ openModal(el.getAttribute("data-switch-modal")); });
-        });
-        $$(".modal-back").forEach(function(m){
-          m.addEventListener("click", function(e){ if(e.target === m) closeModals(); });
-        });
-        document.addEventListener("keydown", function(e){ if(e.key === "Escape") closeModals(); });
-        var supa = null;
-        try{
-          if(window.supabase && window.MRFOLIO_SUPABASE_URL){
-            supa = window.supabase.createClient(window.MRFOLIO_SUPABASE_URL, window.MRFOLIO_SUPABASE_ANON_KEY);
-          }
-        }catch(err){ supa = null; }
-        $$("[data-auth-form]").forEach(function(f){
-          f.addEventListener("submit", function(e){
-            e.preventDefault();
-            var kind = f.getAttribute("data-auth-form");
-            var emailEl = f.querySelector('input[type="email"]');
-            var passEl = f.querySelector('input[type="password"]');
-            var email = emailEl ? emailEl.value.trim() : "";
-            var pass = passEl ? passEl.value : "";
-            if(!email || !pass){ toast("Please fill in your email and password."); return; }
-            if(!supa){ toast("Could not reach the server — check your connection and try again."); return; }
-            var btn = f.querySelector('button[type="submit"]');
-            var origLabel = btn ? btn.textContent : "";
-            if(btn){ btn.disabled = true; btn.textContent = "Please wait…"; }
-            function fail(msg){
-              if(btn){ btn.disabled = false; btn.textContent = origLabel; }
-              toast(msg);
-            }
-            if(kind === "register"){
-              var nameEl = f.querySelector('input[type="text"]');
-              supa.auth.signUp({
-                email: email, password: pass,
-                options: { data: { full_name: nameEl ? nameEl.value : "" } }
-              }).then(function(res){
-                if(res.error){ fail(res.error.message); return; }
-                if(btn){ btn.disabled = false; btn.textContent = origLabel; }
-                if(res.data && res.data.session){
-                  closeModals();
-                  window.location.href = "dashboard.html";
-                }else{
-                  /* email confirmation required — show 6-digit code entry */
-                  pendingEmail = email;
-                  f.style.display = "none";
-                  var alt = f.parentElement.querySelector(".alt-line");
-                  if(alt) alt.style.display = "none";
-                  $("#otpEmail").textContent = email;
-                  var codeEl = $("#otp-code");
-                  if(codeEl) codeEl.value = "";
-                  $("#otpBox").style.display = "";
-                  toast("Account created! Enter the 6-digit code from your email.");
-                }
-              });
-            }else{
-              supa.auth.signInWithPassword({ email: email, password: pass }).then(function(res){
-                if(res.error){ fail(res.error.message); return; }
-                closeModals();
-                window.location.href = "dashboard.html";
-              });
-            }
-          });
-        });
-
-
-        /* ---------- email OTP verification (6-digit code) ---------- */
-        var pendingEmail = "";
-        var otpBtn = $("#otpVerifyBtn");
-        if(otpBtn) otpBtn.addEventListener("click", function(){
-          var codeEl = $("#otp-code");
-          var code = codeEl ? codeEl.value.trim() : "";
-          if(code.length < 6){ toast("Enter the 6-digit code from your email."); return; }
-          if(!supa || !pendingEmail){ toast("Something went wrong — please register again."); return; }
-          otpBtn.disabled = true; otpBtn.textContent = "Verifying…";
-          supa.auth.verifyOtp({ email: pendingEmail, token: code, type: "signup" }).then(function(res){
-            otpBtn.disabled = false; otpBtn.textContent = "Verify & start building";
-            if(res.error){ toast(res.error.message); return; }
-            closeModals();
-            window.location.href = "dashboard.html";
-          });
-        });
-        var otpResend = $("#otpResendBtn");
-        if(otpResend) otpResend.addEventListener("click", function(){
-          if(!supa || !pendingEmail) return;
-          supa.auth.resend({ type: "signup", email: pendingEmail }).then(function(res){
-            toast(res.error ? res.error.message : "Code resent — check your email.");
-          });
-        });
-
-        /* ---------- magic-link fallback: confirmation link lands here ---------- */
-        try{
-          if(supa && window.location.hash && window.location.hash.indexOf("access_token") !== -1){
-            supa.auth.getSession().then(function(res){
-              if(res.data && res.data.session){
-                toast("Email confirmed — taking you to your dashboard…");
-                setTimeout(function(){ window.location.href = "dashboard.html"; }, 1200);
-              }
-            });
-          }
-        }catch(e){}
 
         /* ---------- generic demo buttons ---------- */
         var demoMsgs = {

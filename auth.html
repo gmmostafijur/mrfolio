@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MRFolio — Login / Register</title>
+  <meta name="description" content="Login or create your free MRFolio account." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --bg:#0b0c11; --panel:#14151d; --panel2:#1b1d27;
+      --line:#23252f; --line-strong:#2e313c;
+      --text:#f0eee6; --muted:#b9b7ac; --faint:#8f8d84;
+      --accent:#eda63c; --accent-soft:rgba(237,166,60,.13);
+      --green:#3fb950; --red:#e5484d;
+      --radius:18px;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      font-family:"Manrope",system-ui,-apple-system,sans-serif;
+      background:var(--bg); color:var(--text);
+      min-height:100vh; overflow-x:hidden;
+    }
+    h1,h2,h3,.brand{font-family:"Sora",sans-serif}
+    .auth-wrap{display:grid;grid-template-columns:1.05fr 1fr;min-height:100vh}
+
+    /* ---------- left visual ---------- */
+    .auth-visual{
+      position:relative;overflow:hidden;
+      background:#0d0e14;
+      display:flex;flex-direction:column;justify-content:center;
+      padding:56px clamp(32px,6vw,84px);
+    }
+    .blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;animation:drift 14s ease-in-out infinite alternate}
+    .blob.b1{width:420px;height:420px;background:radial-gradient(circle,#eda63c55,transparent 70%);top:-120px;left:-120px}
+    .blob.b2{width:380px;height:380px;background:radial-gradient(circle,#6d4bd855,transparent 70%);bottom:-100px;right:-80px;animation-delay:-5s}
+    .blob.b3{width:260px;height:260px;background:radial-gradient(circle,#2ea04344,transparent 70%);top:40%;left:55%;animation-delay:-9s}
+    @keyframes drift{
+      from{transform:translate(0,0) scale(1)}
+      to{transform:translate(50px,36px) scale(1.12)}
+    }
+    .visual-inner{position:relative;z-index:2;animation:rise .8s ease both}
+    @keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+    .brand{font-size:26px;font-weight:800;letter-spacing:.3px;text-decoration:none;color:var(--text)}
+    .brand b{color:var(--accent)}
+    .visual-inner h1{font-size:clamp(30px,3.6vw,46px);line-height:1.12;margin:26px 0 14px;font-weight:800}
+    .visual-inner h1 em{font-style:normal;color:var(--accent)}
+    .visual-inner>p{color:var(--muted);font-size:16px;line-height:1.65;max-width:440px}
+    .feat-list{list-style:none;margin-top:30px;display:grid;gap:14px}
+    .feat-list li{display:flex;gap:12px;align-items:center;font-size:14.5px;color:#d8d6cc;animation:rise .8s ease both}
+    .feat-list li:nth-child(2){animation-delay:.12s}
+    .feat-list li:nth-child(3){animation-delay:.24s}
+    .feat-list li:nth-child(4){animation-delay:.36s}
+    .feat-ic{width:36px;height:36px;border-radius:11px;background:var(--accent-soft);border:1px solid rgba(237,166,60,.35);display:grid;place-items:center;color:var(--accent);font-size:17px;flex-shrink:0}
+    .float-card{
+      position:absolute;z-index:2;background:rgba(20,21,29,.85);backdrop-filter:blur(8px);
+      border:1px solid var(--line-strong);border-radius:14px;padding:14px 18px;
+      box-shadow:0 24px 60px rgba(0,0,0,.5);animation:hover 5s ease-in-out infinite;
+    }
+    .float-card.fc1{bottom:8%;right:8%}
+    .float-card.fc2{top:10%;right:14%;animation-delay:-2.5s}
+    @keyframes hover{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+    .float-card b{display:block;font-size:13px}
+    .float-card span{font-size:11.5px;color:var(--faint)}
+
+    /* ---------- right panel ---------- */
+    .auth-panel{display:flex;align-items:center;justify-content:center;padding:40px 24px;position:relative}
+    .auth-card{
+      width:min(430px,100%);background:var(--panel);border:1px solid var(--line);
+      border-radius:22px;padding:38px 36px;box-shadow:0 30px 80px rgba(0,0,0,.45);
+      animation:rise .7s ease both;position:relative;z-index:2;
+    }
+    .auth-tabs{display:grid;grid-template-columns:1fr 1fr;background:#0e0f15;border:1px solid var(--line);border-radius:13px;padding:5px;margin-bottom:26px}
+    .auth-tabs button{
+      background:none;border:0;color:var(--faint);font-family:"Sora",sans-serif;font-weight:700;font-size:14.5px;
+      padding:11px;border-radius:9px;cursor:pointer;transition:all .22s ease;
+    }
+    .auth-tabs button.sel{background:var(--accent-soft);color:var(--accent);box-shadow:inset 0 0 0 1px rgba(237,166,60,.35)}
+    .auth-view{display:none}
+    .auth-view.on{display:block;animation:fadeSlide .35s ease both}
+    @keyframes fadeSlide{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+    .auth-card h2{font-size:24px;margin-bottom:6px}
+    .auth-card .sub{color:var(--muted);font-size:14px;margin-bottom:22px;line-height:1.55}
+    .field{margin-bottom:15px}
+    .field label{display:block;font-size:12.5px;font-weight:700;color:var(--faint);margin-bottom:7px;letter-spacing:.3px}
+    .input{
+      width:100%;background:#0e0f15;border:1px solid var(--line);border-radius:12px;
+      padding:13px 15px;color:var(--text);font-family:inherit;font-size:15px;
+      transition:border-color .2s ease, box-shadow .2s ease;
+    }
+    .input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(237,166,60,.15)}
+    .input::placeholder{color:#5c5a52}
+    select.input{appearance:none}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:9px;
+      font-family:"Sora",sans-serif;font-weight:700;font-size:15px;cursor:pointer;
+      border-radius:12px;padding:14px 22px;border:1px solid transparent;
+      transition:transform .15s ease, box-shadow .2s ease, background .2s ease;
+      text-decoration:none;
+    }
+    .btn:active{transform:scale(.98)}
+    .btn-primary{background:linear-gradient(135deg,#f0b45a,#e0952f);color:#191104;width:100%}
+    .btn-primary:hover{box-shadow:0 12px 32px rgba(237,166,60,.35)}
+    .btn-primary:disabled{opacity:.6;cursor:wait;box-shadow:none}
+    .link-row{display:flex;justify-content:space-between;align-items:center;margin:4px 0 18px;font-size:13.5px}
+    .linklike{background:none;border:0;color:var(--accent);font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit;padding:0}
+    .linklike:hover{text-decoration:underline}
+    .alt-line{margin-top:20px;text-align:center;font-size:13.5px;color:var(--faint)}
+    .back-home{display:block;text-align:center;margin-top:26px;font-size:13px;color:var(--faint);text-decoration:none}
+    .back-home:hover{color:var(--text)}
+
+    /* OTP boxes */
+    .otp-row{display:flex;gap:9px;justify-content:center;margin:6px 0 20px}
+    .otp-box{
+      width:48px;height:56px;text-align:center;font-size:24px;font-weight:800;font-family:"Sora",sans-serif;
+      background:#0e0f15;border:1px solid var(--line-strong);border-radius:12px;color:var(--text);
+      transition:border-color .2s ease, box-shadow .2s ease, transform .15s ease;
+    }
+    .otp-box:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(237,166,60,.18);transform:translateY(-2px)}
+    .otp-box.filled{border-color:var(--accent)}
+
+    .msg{
+      border-radius:12px;padding:13px 16px;font-size:14px;line-height:1.55;margin-bottom:18px;display:none;
+    }
+    .msg.show{display:block;animation:fadeSlide .3s ease both}
+    .msg.ok{background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.4);color:#7ee2a0}
+    .msg.err{background:rgba(229,72,77,.1);border:1px solid rgba(229,72,77,.4);color:#ff9a9e}
+
+    .toast{
+      position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);opacity:0;pointer-events:none;
+      background:#1d1f27;color:#f3f1ea;border:1px solid #343743;border-radius:12px;padding:13px 20px;
+      font-size:14.5px;font-weight:700;z-index:200;box-shadow:0 20px 40px rgba(0,0,0,.5);
+      transition:opacity .25s ease,transform .25s ease;max-width:min(480px,90vw);text-align:center;
+    }
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    .spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.25);border-top-color:#191104;border-radius:50%;animation:sp .7s linear infinite}
+    @keyframes sp{to{transform:rotate(360deg)}}
+
+    @media (max-width:900px){
+      .auth-wrap{grid-template-columns:1fr}
+      .auth-visual{min-height:340px;padding:40px 28px}
+      .float-card{display:none}
+      .visual-inner h1{font-size:30px}
+    }
+    @media (prefers-reduced-motion:reduce){
+      .blob,.float-card,.visual-inner,.auth-card{animation:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-visual" aria-hidden="true">
+      <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+      <div class="visual-inner">
+        <a class="brand" href="index.html">MR<b>Folio</b></a>
+        <h1>Your portfolio,<br /><em>live</em> in minutes.</h1>
+        <p>Build a stunning portfolio, connect your GitHub, and share one link everywhere — free to start.</p>
+        <ul class="feat-list">
+          <li><span class="feat-ic">✦</span> 9 designer themes — 2 free, 7 pro</li>
+          <li><span class="feat-ic">◈</span> Live preview while you edit</li>
+          <li><span class="feat-ic">⬢</span> Publish to your own GitHub Pages</li>
+          <li><span class="feat-ic">✉</span> Contact section straight to your Gmail</li>
+        </ul>
+      </div>
+      <div class="float-card fc1"><b>🎨 9 themes</b><span>Marketer · Developer · Designer</span></div>
+      <div class="float-card fc2"><b>🚀 username.github.io</b><span>Your own live link</span></div>
+    </div>
+
+    <div class="auth-panel">
+      <div class="auth-card">
+        <div class="auth-tabs" role="tablist">
+          <button id="tabLogin" class="sel" type="button">Login</button>
+          <button id="tabRegister" type="button">Register</button>
+        </div>
+        <div class="msg" id="authMsg"></div>
+
+        <!-- LOGIN -->
+        <div class="auth-view on" id="view-login">
+          <h2>Welcome back</h2>
+          <p class="sub">Login to manage your portfolio.</p>
+          <form id="loginForm" autocomplete="on">
+            <div class="field"><label for="li-email">Email</label><input class="input" id="li-email" type="email" placeholder="you@example.com" required autocomplete="email" /></div>
+            <div class="field"><label for="li-pass">Password</label><input class="input" id="li-pass" type="password" placeholder="Your password" required autocomplete="current-password" /></div>
+            <div class="link-row"><span></span><button class="linklike" type="button" id="forgotLink">Forgot password?</button></div>
+            <button class="btn btn-primary" type="submit" id="loginBtn">Login</button>
+          </form>
+        </div>
+
+        <!-- REGISTER -->
+        <div class="auth-view" id="view-register">
+          <h2>Create your account</h2>
+          <p class="sub">Free plan — live link in about 10 minutes.</p>
+          <form id="registerForm" autocomplete="on">
+            <div class="field"><label for="rg-name">Full name</label><input class="input" id="rg-name" type="text" placeholder="e.g. Ayesha Khan" required autocomplete="name" /></div>
+            <div class="field"><label for="rg-email">Email</label><input class="input" id="rg-email" type="email" placeholder="you@example.com" required autocomplete="email" /></div>
+            <div class="field"><label for="rg-pass">Password</label><input class="input" id="rg-pass" type="password" placeholder="Min. 6 characters" required minlength="6" autocomplete="new-password" /></div>
+            <div class="field"><label for="rg-cat">I am a…</label>
+              <select class="input" id="rg-cat">
+                <option>Marketer</option><option>Developer</option><option>Designer</option><option>Photographer</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" type="submit" id="registerBtn">Register &amp; get my code</button>
+          </form>
+        </div>
+
+        <!-- OTP -->
+        <div class="auth-view" id="view-otp">
+          <h2>Check your email</h2>
+          <p class="sub">We sent a 6-digit code to <b id="otpEmail" style="color:var(--text)"></b>. Enter it below:</p>
+          <div class="otp-row" id="otpRow">
+            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 1" />
+            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2" />
+            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3" />
+            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4" />
+            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5" />
+            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6" />
+          </div>
+          <button class="btn btn-primary" type="button" id="otpVerifyBtn">Verify &amp; start building</button>
+          <p class="alt-line">Didn't get the code? <button class="linklike" type="button" id="otpResendBtn">Resend code</button></p>
+        </div>
+
+        <!-- FORGOT -->
+        <div class="auth-view" id="view-forgot">
+          <h2>Reset password</h2>
+          <p class="sub">Enter your account email — we'll send you a reset link.</p>
+          <form id="forgotForm">
+            <div class="field"><label for="fg-email">Email</label><input class="input" id="fg-email" type="email" placeholder="you@example.com" required /></div>
+            <button class="btn btn-primary" type="submit" id="forgotBtn">Send reset link</button>
+          </form>
+          <p class="alt-line"><button class="linklike" type="button" data-goto="login">← Back to login</button></p>
+        </div>
+
+        <!-- NEW PASSWORD (from email link) -->
+        <div class="auth-view" id="view-reset">
+          <h2>Set new password</h2>
+          <p class="sub">Choose a new password for your account.</p>
+          <form id="resetForm">
+            <div class="field"><label for="rs-pass">New password</label><input class="input" id="rs-pass" type="password" placeholder="Min. 6 characters" required minlength="6" autocomplete="new-password" /></div>
+            <div class="field"><label for="rs-pass2">Confirm new password</label><input class="input" id="rs-pass2" type="password" placeholder="Repeat it" required autocomplete="new-password" /></div>
+            <button class="btn btn-primary" type="submit" id="resetBtn">Save new password</button>
+          </form>
+        </div>
+
+        <a class="back-home" href="index.html">← Back to MRFolio home</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script>
+    "use strict";
+    var AUTH_URL = "https://gmmostafijur.github.io/mrfolio/auth.html";
+
+    function $(s, c){ return (c || document).querySelector(s); }
+    function $$(s, c){ return Array.prototype.slice.call((c || document).querySelectorAll(s)); }
+    var toastTimer = null;
+    function toast(msg){
+      var t = $("#toast"); t.textContent = msg; t.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 3200);
+    }
+    function showMsg(text, kind){
+      var m = $("#authMsg");
+      m.textContent = text;
+      m.className = "msg show " + (kind || "");
+    }
+    function clearMsg(){ var m = $("#authMsg"); m.className = "msg"; m.textContent = ""; }
+
+    function supaClient(){
+      try{
+        if(window.MRF_SUPABASE_URL && window.MRF_SUPABASE_ANON_KEY && window.supabase){
+          return window.supabase.createClient(window.MRF_SUPABASE_URL, window.MRF_SUPABASE_ANON_KEY);
+        }
+      }catch(e){}
+      return null;
+    }
+    var supa = supaClient();
+    var pendingEmail = "";
+
+    /* ---------- view switching ---------- */
+    function showView(name){
+      clearMsg();
+      $$(".auth-view").forEach(function(v){ v.classList.remove("on"); });
+      var v = $("#view-" + name);
+      if(v) v.classList.add("on");
+      var isReg = (name === "register" || name === "otp");
+      $("#tabLogin").classList.toggle("sel", !isReg && name !== "forgot" && name !== "reset");
+      $("#tabRegister").classList.toggle("sel", isReg);
+      if(name === "otp") setTimeout(function(){ var b = $(".otp-box"); if(b) b.focus(); }, 80);
+    }
+    $("#tabLogin").addEventListener("click", function(){ showView("login"); });
+    $("#tabRegister").addEventListener("click", function(){ showView("register"); });
+    $$("[data-goto]").forEach(function(b){
+      b.addEventListener("click", function(){ showView(b.getAttribute("data-goto")); });
+    });
+
+    /* ---------- login ---------- */
+    $("#loginForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      clearMsg();
+      var email = $("#li-email").value.trim();
+      var pass = $("#li-pass").value;
+      if(!email || !pass){ showMsg("Please fill in your email and password.", "err"); return; }
+      if(!supa){ showMsg("Could not reach the server — check your connection.", "err"); return; }
+      var btn = $("#loginBtn");
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Logging in…';
+      supa.auth.signInWithPassword({ email: email, password: pass }).then(function(res){
+        btn.disabled = false; btn.textContent = "Login";
+        if(res.error){
+          if(res.error.message && res.error.message.toLowerCase().indexOf("confirm") !== -1){
+            pendingEmail = email;
+            $("#otpEmail").textContent = email;
+            clearOtp();
+            showView("otp");
+            showMsg("Please confirm your email first — enter the code we sent.", "");
+          } else {
+            showMsg(res.error.message, "err");
+          }
+          return;
+        }
+        window.location.href = "dashboard.html";
+      });
+    });
+
+    /* ---------- register ---------- */
+    $("#registerForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      clearMsg();
+      var name = $("#rg-name").value.trim();
+      var email = $("#rg-email").value.trim();
+      var pass = $("#rg-pass").value;
+      if(!name || !email || !pass){ showMsg("Please fill in all fields.", "err"); return; }
+      if(pass.length < 6){ showMsg("Password must be at least 6 characters.", "err"); return; }
+      if(!supa){ showMsg("Could not reach the server — check your connection.", "err"); return; }
+      var btn = $("#registerBtn");
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Creating account…';
+      supa.auth.signUp({
+        email: email, password: pass,
+        options: { data: { full_name: name } }
+      }).then(function(res){
+        btn.disabled = false; btn.textContent = "Register & get my code";
+        if(res.error){ showMsg(res.error.message, "err"); return; }
+        if(res.data && res.data.session){
+          window.location.href = "dashboard.html";
+        } else {
+          pendingEmail = email;
+          $("#otpEmail").textContent = email;
+          clearOtp();
+          showView("otp");
+          showMsg("Account created! Enter the 6-digit code from your email.", "ok");
+        }
+      });
+    });
+
+    /* ---------- OTP boxes ---------- */
+    var otpBoxes = $$(".otp-box");
+    function clearOtp(){ otpBoxes.forEach(function(b){ b.value = ""; b.classList.remove("filled"); }); }
+    function otpCode(){ return otpBoxes.map(function(b){ return b.value; }).join(""); }
+    otpBoxes.forEach(function(box, i){
+      box.addEventListener("input", function(){
+        box.value = box.value.replace(/[^0-9]/g, "").slice(0, 1);
+        box.classList.toggle("filled", !!box.value);
+        if(box.value && i < otpBoxes.length - 1) otpBoxes[i + 1].focus();
+      });
+      box.addEventListener("keydown", function(e){
+        if(e.key === "Backspace" && !box.value && i > 0) otpBoxes[i - 1].focus();
+      });
+      box.addEventListener("paste", function(e){
+        e.preventDefault();
+        var text = (e.clipboardData.getData("text") || "").replace(/[^0-9]/g, "").slice(0, 6);
+        text.split("").forEach(function(ch, j){
+          if(otpBoxes[j]){ otpBoxes[j].value = ch; otpBoxes[j].classList.add("filled"); }
+        });
+        if(text.length) otpBoxes[Math.min(text.length, 5)].focus();
+      });
+    });
+    $("#otpVerifyBtn").addEventListener("click", function(){
+      clearMsg();
+      var code = otpCode();
+      if(code.length !== 6){ showMsg("Enter the full 6-digit code.", "err"); return; }
+      if(!supa || !pendingEmail){ showMsg("Something went wrong — please register again.", "err"); return; }
+      var btn = $("#otpVerifyBtn");
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Verifying…';
+      supa.auth.verifyOtp({ email: pendingEmail, token: code, type: "signup" }).then(function(res){
+        btn.disabled = false; btn.textContent = "Verify & start building";
+        if(res.error){ showMsg(res.error.message, "err"); return; }
+        window.location.href = "dashboard.html";
+      });
+    });
+    $("#otpResendBtn").addEventListener("click", function(){
+      if(!supa || !pendingEmail) return;
+      supa.auth.resend({ type: "signup", email: pendingEmail }).then(function(res){
+        showMsg(res.error ? res.error.message : "Code resent — check your email.", res.error ? "err" : "ok");
+      });
+    });
+
+    /* ---------- forgot password ---------- */
+    $("#forgotLink").addEventListener("click", function(){ showView("forgot"); });
+    $("#forgotForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      clearMsg();
+      var email = $("#fg-email").value.trim();
+      if(!email){ showMsg("Enter your account email.", "err"); return; }
+      if(!supa){ showMsg("Could not reach the server — check your connection.", "err"); return; }
+      var btn = $("#forgotBtn");
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Sending…';
+      supa.auth.resetPasswordForEmail(email, { redirectTo: AUTH_URL }).then(function(res){
+        btn.disabled = false; btn.textContent = "Send reset link";
+        if(res.error){ showMsg(res.error.message, "err"); return; }
+        showMsg("Reset link sent! Check your email, then click the link to set a new password.", "ok");
+      });
+    });
+
+    /* ---------- new password (from email link) ---------- */
+    $("#resetForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      clearMsg();
+      var p1 = $("#rs-pass").value, p2 = $("#rs-pass2").value;
+      if(p1.length < 6){ showMsg("Password must be at least 6 characters.", "err"); return; }
+      if(p1 !== p2){ showMsg("Passwords do not match.", "err"); return; }
+      if(!supa){ showMsg("Could not reach the server.", "err"); return; }
+      var btn = $("#resetBtn");
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Saving…';
+      supa.auth.updateUser({ password: p1 }).then(function(res){
+        btn.disabled = false; btn.textContent = "Save new password";
+        if(res.error){ showMsg(res.error.message, "err"); return; }
+        showMsg("Password updated! Taking you to your dashboard…", "ok");
+        setTimeout(function(){ window.location.href = "dashboard.html"; }, 1200);
+      });
+    });
+
+    /* ---------- on load: mode param / recovery link / existing session ---------- */
+    (function(){
+      var q = new URLSearchParams(window.location.search);
+      if(q.get("mode") === "register") showView("register");
+      var hash = window.location.hash || "";
+      if(hash.indexOf("type=recovery") !== -1){
+        showView("reset");
+        showMsg("Click the email link brought you here — set a new password below.", "ok");
+        return;
+      }
+      if(supa){
+        supa.auth.getSession().then(function(res){
+          if(res.data && res.data.session && hash.indexOf("access_token") === -1){
+            window.location.href = "dashboard.html";
+          } else if(hash.indexOf("access_token") !== -1 && res.data && res.data.session){
+            window.location.href = "dashboard.html";
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
