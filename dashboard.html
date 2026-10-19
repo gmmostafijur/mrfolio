@@ -752,8 +752,8 @@
       /* ---------- supabase ---------- */
       function supaClient(){
         try{
-          if(window.MRF_SUPABASE_URL && window.MRF_SUPABASE_ANON_KEY && window.supabase){
-            return window.supabase.createClient(window.MRF_SUPABASE_URL, window.MRF_SUPABASE_ANON_KEY);
+          if(window.MRFOLIO_SUPABASE_URL && window.MRFOLIO_SUPABASE_ANON_KEY && window.supabase){
+            return window.supabase.createClient(window.MRFOLIO_SUPABASE_URL, window.MRFOLIO_SUPABASE_ANON_KEY);
           }
         }catch(e){}
         return null;
