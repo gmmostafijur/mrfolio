@@ -1469,11 +1469,20 @@
           var repo = user.login + ".github.io";
           var rr = await fetch("https://api.github.com/repos/" + encodeURIComponent(user.login) + "/" + encodeURIComponent(repo));
           if(!rr.ok) throw new Error("Repo " + repo + " not found — create it first (Public).");
+          var repoData = await rr.json();
+          /* Pages check: the Pages API returns 404 unauthenticated for some username.github.io sites,
+             so fall back to the repo's has_pages flag when that happens. */
+          var pagesOk = false;
           var pr = await fetch("https://api.github.com/repos/" + encodeURIComponent(user.login) + "/" + encodeURIComponent(repo) + "/pages");
-          if(!pr.ok) throw new Error("GitHub Pages is not enabled — repo Settings → Pages → Deploy from branch: main, then Save.");
-          var pages = await pr.json();
-          var branch = pages.source && pages.source.branch;
-          if(branch !== "main") throw new Error("Pages is deployed from '" + branch + "' — change it to main (Settings → Pages).");
+          if(pr.ok){
+            var pages = await pr.json();
+            var branch = pages.source && pages.source.branch;
+            if(branch && branch !== "main") throw new Error("Pages is deployed from '" + branch + "' — change it to main (Settings → Pages).");
+            pagesOk = true;
+          } else if(repoData.has_pages){
+            pagesOk = true;
+          }
+          if(!pagesOk) throw new Error("GitHub Pages is not enabled — repo Settings → Pages → Deploy from branch: main, then Save.");
           state.ghUser = user.login; state.ghOn = true;
           await saveProfileFields({ github_username: user.login });
           try{ localStorage.setItem("mrfolio_gh_user", user.login); }catch(e){}
