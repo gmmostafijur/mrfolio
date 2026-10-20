@@ -365,11 +365,24 @@
         if(res.error){ showMsg(res.error.message, "err"); return; }
         if(res.data && res.data.session){
           window.location.href = "dashboard.html";
+          return;
+        }
+        pendingEmail = email;
+        $("#otpEmail").textContent = email;
+        clearOtp();
+        showView("otp");
+        var dup = res.data && res.data.user && Array.isArray(res.data.user.identities) && res.data.user.identities.length === 0;
+        if(dup){
+          /* Email was already registered but unconfirmed: Supabase sends NO new code on a
+             repeated signup, so trigger a fresh one ourselves. */
+          supa.auth.resend({ type: "signup", email: email }).then(function(r2){
+            if(r2.error){
+              showMsg("This email is already registered. " + r2.error.message + " Try logging in instead.", "err");
+            } else {
+              showMsg("This email was already registered — a fresh code was just sent. Enter it below.", "ok");
+            }
+          });
         } else {
-          pendingEmail = email;
-          $("#otpEmail").textContent = email;
-          clearOtp();
-          showView("otp");
           showMsg("Account created! Enter the 6-digit code from your email.", "ok");
         }
       });
